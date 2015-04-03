@@ -14,5 +14,5 @@ It is written in Python by the Python rookie @terry182
 *  Edit the variables in `main.py`.
 
 ##In Progress
-- [] GUI supported
-- [] Chat log compression
+- [ ] GUI supported
+- [ ] Chat log compression
