@@ -8,13 +8,35 @@ import codecs    # File I/O with UTF-8
 #User-defined Arguments
 token = 'your-token'
 slack = slacker.Slacker(token)
-channel = 'random'
+channel = 'general'
 #filename = '{}_backup_{:%Y%m%d}'.format(channel,date)
 filename = 'backup.txt'
 #end of the arguments
 
 output_file = codecs.open(filename, "w", "utf-8-sig")
 cnt = 0
+#Real 2ch 1001 rule
+_str1001 = '''
+　　　　　　　　　　　　　　　　　　　　　　γ
+　　　　　　　　　　　　　　　　　　　　　　（
+　　　　　　　　　　　　　　　　　　　　　 _ノ
+
+　　　　　　　　　　　　　　　　　　　／
+　　　　　　　　　　　　　　　 ＿＿
+　　　　　　　　　　　　　,､'" 　 ．　 `' ､
+　　　　　　　　　　　　　i`ｰ　　_　　　　',
+.　 　　　　　　　　　　　l|　!|　 　 　 i""!|
+　 　 　 　　 　 　 　 　 }:　}ｉ　　　　|{ 　!ｊ
+　 　 　 　 　 　　　　　〈| 'Ｊ　|!　　 }ｊ 　:｝
+　　　　　　　　　　　　_ﾉ;し　 i｝　 ｛J　 |
+　　　　　　　　　,､-,､'　　　　　　　　　ハ- ､
+　　　　　　　 　（ .(　'､＿　　　 _ ,ノ　 ﾉ:i 　 ）
+　　　　　　　　,､'""`ｰ---‐'"ﾌ､_　- _,､' -'"
+　　　　　　　 （　　＿　　 ,､'"　　 ￣
+　　　　　　　　 `ー--─'"
+千本目の蝋燭が消えますた・・・
+新しい蝋燭を立ててくださいです・・・ 
+'''
 
 def make_user_dict():
     l = slack.users.list()
@@ -38,8 +60,7 @@ response = slack.channels.history(_id, count = 1000)
 if response.body['messages']:
     print('Message Exists. {0} message(s) found.'.format(len(response.body['messages'])))
 ts = 0
-dic = make_user_dict();
-flag = True
+dic = make_user_dict()
 l = []
 
 # Reading File History
@@ -52,10 +73,7 @@ while(response.body['has_more'] == True):
             l.append(Msg(msg['user'], msg['ts'], msg['text']))
         ts = msg['ts']
 
-    if flag:
-        response = slack.channels.history(_id, latest = ts, count = 1)   #  2ch 1001 RULE
-        flag = False
-    else:
+
         # Output
         #print ('Len of l', len(l))
         l.reverse()
@@ -65,11 +83,11 @@ while(response.body['has_more'] == True):
             cnt = cnt + 1
             output_file.write(str(cnt) + '名前: {0} : {1} ID:{2} \n'.format(dic[msg.user], time.strftime("%Y/%m/%d %a %H:%M:%S", time.localtime(float(msg.ts))), msg.user))
             output_file.write('\t' + msg.getTextAs2CH() + '\n')
+            output_file.write('1001 ：１００１：Over 1000 Thread \n')
+            output_file.write(_str1001)
         l = []
-
         response = slack.channels.history(_id, latest = ts, count = 1000)
-        flag = True
-    #print('Latest Timestamp:', ts)
+        #print('Latest Timestamp:', ts)
 else:
     for msg in response.body['messages']:
         if 'subtype' in msg:
@@ -85,6 +103,9 @@ else:
             output_file.write('名前: {0} : {1} ID:{2}'.format(dic[msg.user], time.strftime("%Y/%m/%d %a %H:%M:%S", time.localtime(float(msg.ts))), msg.user) + '\n')
             output_file.write('\t' + msg.getTextAs2CH() + '\n')
             #msg.print(dic)
+        if len(l) == 1000:
+            output_file.write('1001 ：１００１：Over 1000 Thread \n')
+            output_file.write(_str1001)
         l = []
 
 output_file.close()
