@@ -5,12 +5,14 @@ import time
 from msg import Msg
 import codecs    # File I/O with UTF-8
 
-
-token = 'your-token-here'
+#User-defined Arguments
+token = 'your-token'
 slack = slacker.Slacker(token)
-channel = 'general'
+channel = 'random'
 #filename = '{}_backup_{:%Y%m%d}'.format(channel,date)
 filename = 'backup.txt'
+#end of the arguments
+
 output_file = codecs.open(filename, "w", "utf-8-sig")
 cnt = 0
 
@@ -45,7 +47,7 @@ while(response.body['has_more'] == True):
     last_user = '';
     for msg in response.body['messages']:
         if 'subtype' in msg:
-            l.append(Msg(msg['user'], msg['ts'], msg['text'], msg['subtype']))
+            l.append(Msg(msg.get('user'), msg['ts'], msg['text'], msg['subtype']))
         else:
             l.append(Msg(msg['user'], msg['ts'], msg['text']))
         ts = msg['ts']
@@ -60,11 +62,12 @@ while(response.body['has_more'] == True):
         for msg in l:
             if msg.user not in dic:
                 dic[msg.user] = msg.user
-            output_file.write(++cnt + '名前: {0} : {1} ID:{2} \n'.format(dic[self.user], time.strftime("%Y/%m/%d %a %H:%M:%S", time.localtime(float(self.ts))), self.user))
+            cnt = cnt + 1
+            output_file.write(str(cnt) + '名前: {0} : {1} ID:{2} \n'.format(dic[msg.user], time.strftime("%Y/%m/%d %a %H:%M:%S", time.localtime(float(msg.ts))), msg.user))
             output_file.write('\t' + msg.getTextAs2CH() + '\n')
         l = []
 
-        response = slack.channel.history(_id, latest = ts, count = 1000)
+        response = slack.channels.history(_id, latest = ts, count = 1000)
         flag = True
     #print('Latest Timestamp:', ts)
 else:
@@ -81,7 +84,7 @@ else:
                 dic[msg.user] = msg.user
             output_file.write('名前: {0} : {1} ID:{2}'.format(dic[msg.user], time.strftime("%Y/%m/%d %a %H:%M:%S", time.localtime(float(msg.ts))), msg.user) + '\n')
             output_file.write('\t' + msg.getTextAs2CH() + '\n')
+            #msg.print(dic)
         l = []
 
 output_file.close()
-
