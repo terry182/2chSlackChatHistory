@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import sys       # working for arguments
 import slacker
+from msg import Msg
 import datetime
 import codecs    # File I/O with UTF-8
 
@@ -33,26 +34,44 @@ print('id = {}'.format(_id))
 response = slack.channels.history(_id, count = 10)
 ts = 0
 dic = make_user_dict();
-output_file = codecs.open(filename, "w", "utf-8-sig")
+flag = True
+l = []
 
-
+# Reading File History
 while(response.body['has_more'] == True):
     last_user = '';
     for msg in response.body['messages']:
-        if msg['type'] == 'message':
-            if 'subtype' in msg:
-                if msg['subtype'] == "file_share":
-                    output_file.write(msg['text'] + '\n')
-                else:
-                    print('Subtype exists. Pass this line for later edit.')
-            else:
-                if msg['user'] != last_user:
-                    last_user = msg['user']
-                    output_file.write(dic[msg['user']] + ': \n')
-                output_file.write('\t' + msg['text'] + '\n')
-                ts = msg['ts']
+        if 'subtype' in msg:
+            l.append(Msg(msg['user'], msg['ts'], msg['text'], msg['subtype']))
+        else:
+            l.append(Msg(msg['user'], msg['ts'], msg['text']))
+        ts = msg['ts']
+
+    #if flag:
+    #    response = slack.channels.history(_id, count = 1)   #  2ch 1001 RULE
+    #    flag = False
+    #else:
+    #    response = slack.channel.history(_id, count = 1000)
+    #    flag = True
     print('Latest Timestamp:', ts)
     break
+#else:
+#    for msg in response.body['messages']:
+#        if 'subtype' in msg:
+#            Msg.l.append(Msg(msg['user'], msg['ts'], msg['text'], msg['subtype']))
+#        else:
+#            Msg.l.append(Msg(msg['user'], msg['ts'], msg['text']))
 
-output_file.close()
+print ('Len of l', len(l))
+l.reverse()
+for msg in l:
+    msg.print(dic)
+l.c
+
+# Output
+#output_file = codecs.open(filename, "w", "utf-8-sig")
+#cnt = 0
+
+
+#output_file.close()
 
