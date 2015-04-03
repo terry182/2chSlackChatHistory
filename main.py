@@ -6,7 +6,7 @@ from msg import Msg
 import codecs    # File I/O with UTF-8
 
 
-token = 'xoxp-2734280152-4137412349-4279772753-169911'
+token = 'your-token-here'
 slack = slacker.Slacker(token)
 channel = 'general'
 #filename = '{}_backup_{:%Y%m%d}'.format(channel,date)
@@ -81,7 +81,6 @@ else:
                 dic[msg.user] = msg.user
             output_file.write('名前: {0} : {1} ID:{2}'.format(dic[msg.user], time.strftime("%Y/%m/%d %a %H:%M:%S", time.localtime(float(msg.ts))), msg.user) + '\n')
             output_file.write('\t' + msg.getTextAs2CH() + '\n')
-            #msg.print(dic)
         l = []
 
 output_file.close()
