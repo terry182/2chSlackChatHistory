@@ -35,7 +35,7 @@ _str1001 = '''
 　　　　　　　 （　　＿　　 ,､'"　　 ￣
 　　　　　　　　 `ー--─'"
 千本目の蝋燭が消えますた・・・
-新しい蝋燭を立ててくださいです・・・ 
+新しい蝋燭を立ててくださいです・・・
 '''
 
 def make_user_dict():
@@ -102,7 +102,7 @@ else:
                 dic[msg.user] = msg.user
             output_file.write('名前: {0} : {1} ID:{2}'.format(dic[msg.user], time.strftime("%Y/%m/%d %a %H:%M:%S", time.localtime(float(msg.ts))), msg.user) + '\n')
             output_file.write('\t' + msg.getTextAs2CH() + '\n')
-            #msg.print(dic)
+            #msg.print_(dic)
         if len(l) == 1000:
             output_file.write('1001 ：１００１：Over 1000 Thread \n')
             output_file.write(_str1001)
