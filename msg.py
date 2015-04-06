@@ -1,8 +1,9 @@
 import time
-import re       #Regular Expression
+import re       # Regular Expression
+
 
 class Msg:
-    def __init__(self, user, ts, text, subtype = 0, **kwargs):
+    def __init__(self, user, ts, text, subtype=0, **kwargs):
         self.user = user
         self.ts = ts
         self.text = text
@@ -13,7 +14,7 @@ class Msg:
 
     def getTextAs2CH(self, dic):
         self.text = re.sub('<@([A-Z0-9]+)>', r'@\1', self.text)
-        return  self.text.replace('\n', '\n\t')
+        return self.text.replace('\n', '\n\t')
 
     def writeToFile(self, output_file, dic, cnt):
         if self.subtype == 'bot_message':
