@@ -3,8 +3,9 @@ import slacker
 from msg import Msg
 import codecs  # File I/O with UTF-8
 
+
 # User-defined Arguments
-token = 'xoxp-2734280152-4137412349-4293823360-a7d3bf'
+token = 'your-token'
 slack = slacker.Slacker(token)
 channel = 'general'
 # filename = '{}_backup_{:%Y%m%d}'.format(channel,date)
@@ -50,17 +51,29 @@ def out_1001(output_file):
     output_file.write(_str1001)
 
 
-def MessageReading(message, MessageList, UserDic):
-    if 'subtype' not in message:
-        MessageList.append(Msg(message['user'], message['ts'], message['text']))
-    elif message['subtype'] == 'bot_message':
+def MessageReading(msg, msgList, UserDic):
+    if 'subtype' not in msg:
+        msgList.append(Msg(msg['user'], msg['ts'], msg['text']))
+
+    elif msg['subtype'] == 'bot_message':
         print('Bot message Exists.')
-        UserDic[message['bot_id']] = message['user_name']
-        MessageList.append(Msg(message['bot_id'], message['ts'], message['text'], message['subtype']))
-    elif message['subtype'] == 'me_message':
-        MessageList.append(Msg(message['user'], message['ts'], message['text'], message['subtype']))
-    elif message['subtype'] == 'message_changed':
-        MessageList.append(Msg(message['user'], message['ts'], message['text'], message['subtype'], edit_user=message['edited']['user'], edit_ts=message['edited']['ts']))
+        UserDic[msg['bot_id']] = msg['user_name']
+        msgList.append(Msg(msg['bot_id'], msg['ts'],
+                           msg['text'], msg['subtype']))
+    elif msg['subtype'] == 'me_message':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           msg['text'], msg['subtype']))
+    elif msg['subtype'] == 'message_changed':
+        msgList.append(Msg(msg['user'], msg['ts'], msg['text'],
+                       msg['subtype'], edit_user=msg['edited']['user'],
+                       edit_ts=msg['edited']['ts']))
+    elif msg['subtype'] == 'message_deleted':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                       'Message deleted at {}'.format(time.strftime(
+                       "%Y/%m/%d %a %H:%M:%S",
+                       time.localtime(float(msg['deleted_ts']))))) )
+    elif msg['subtype'] == 'channel_join':
+
     else:
         pass
 
@@ -76,7 +89,8 @@ print('Channel id = {}'.format(_id))
 # Getting History
 response = slack.channels.history(_id, count=1000)
 if response.body['messages']:
-    print('Message Exists. {0} message(s) found.'.format(len(response.body['messages'])))
+    print('Message Exists. {0} message(s) found.'.format(
+                                        len(response.body['messages'])))
 else:
     print('No message exists.')
 
@@ -85,27 +99,23 @@ dic = make_user_dict()
 l = []
 
 # Reading File History
-while(response.body['has_more'] is True):
-    last_user = ''
+if response.body['has_more'] is True:
     for msg in response.body['messages']:
-        if 'subtype' in msg:
-            l.append(Msg(msg.get('user'), msg['ts'], msg['text'], msg['subtype']))
-        else:
-            l.append(Msg(msg['user'], msg['ts'], msg['text']))
+        MessageReading(msg, l, dic)
         ts = msg['ts']
+    # Output
+    print ('Len of l', len(l))
+    l.reverse()
+    for msg in l:
+        if msg.user not in dic:
+            dic[msg.user] = msg.user
+        cnt = cnt + 1
+        msg.writeToFile(output_file, dic, cnt)
+    out_1001(output_file)
+    l = []
 
-        # Output
-        # print ('Len of l', len(l))
-        l.reverse()
-        for msg in l:
-            if msg.user not in dic:
-                dic[msg.user] = msg.user
-            cnt = cnt + 1
-            msg.writeToFile(output_file, dic, cnt)
-        out_1001(output_file)
-        l = []
-        response = slack.channels.history(_id, latest=ts, count=1000)
-        # print('Latest Timestamp:', ts)
+    # response = slack.channels.history(_id, latest=ts, count=1000)
+    print('Latest Timestamp:', ts)
 else:
     for msg in response.body['messages']:
         MessageReading(msg, l, dic)
