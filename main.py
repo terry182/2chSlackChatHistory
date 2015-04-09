@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import slacker
+import time
 from msg import Msg
 import codecs  # File I/O with UTF-8
 
@@ -8,8 +9,9 @@ import codecs  # File I/O with UTF-8
 token = 'your-token'
 slack = slacker.Slacker(token)
 channel = 'general'
-# filename = '{}_backup_{:%Y%m%d}'.format(channel,date)
-filename = 'backup.txt'
+CurrentTime = time.strftime("%Y%m%d", time.localtime(float(time.time())))
+filename = '{0}_backup_{1}'.format(channel, CurrentTime)
+# filename = 'backup.txt'
 # end of the arguments
 
 output_file = codecs.open(filename, "w", "utf-8-sig")
@@ -69,11 +71,15 @@ def MessageReading(msg, msgList, UserDic):
                        edit_ts=msg['edited']['ts']))
     elif msg['subtype'] == 'message_deleted':
         msgList.append(Msg(msg['user'], msg['ts'],
-                       'Message deleted at {}'.format(time.strftime(
-                       "%Y/%m/%d %a %H:%M:%S",
-                       time.localtime(float(msg['deleted_ts']))))) )
+                       'Message deleted at {}'.format(
+                       time.strftime("%Y/%m/%d %a %H:%M:%S",
+                                     time.localtime(float(msg['deleted_ts'])))
+                                     )))
     elif msg['subtype'] == 'channel_join':
-
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} has joined the channel'.format(
+                            dic[msg['user']]
+                            ), msg['subtype']))
     else:
         pass
 
@@ -95,16 +101,17 @@ else:
     print('No message exists.')
 
 ts = 0
+file_count = 0
 dic = make_user_dict()
 l = []
 
 # Reading File History
-if response.body['has_more'] is True:
+while response.body['has_more'] is True:
     for msg in response.body['messages']:
         MessageReading(msg, l, dic)
         ts = msg['ts']
     # Output
-    print ('Len of l', len(l))
+    print('Len of l', len(l))
     l.reverse()
     for msg in l:
         if msg.user not in dic:
@@ -114,8 +121,13 @@ if response.body['has_more'] is True:
     out_1001(output_file)
     l = []
 
-    # response = slack.channels.history(_id, latest=ts, count=1000)
-    print('Latest Timestamp:', ts)
+    response = slack.channels.history(_id, latest=ts, count=1000)
+    print('File {} Latest Timestamp:'.format(file_count), ts)
+    file_count = file_count + 1
+    output_file.close()
+    output_file = codecs.open('{}_{}'.format(filename, file_count),
+                              "w", "utf-8-sig")
+
 else:
     for msg in response.body['messages']:
         MessageReading(msg, l, dic)
@@ -132,5 +144,6 @@ else:
             out_1001(output_file)
 
         l = []
+
 
 output_file.close()
