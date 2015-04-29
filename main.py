@@ -56,29 +56,103 @@ def out_1001(output_file):
 def MessageReading(msg, msgList, UserDic):
     if 'subtype' not in msg:
         msgList.append(Msg(msg['user'], msg['ts'], msg['text']))
-
-    elif msg['subtype'] == 'bot_message':
+    subtype = msg.get('subtype', None)
+    if subtype == 'bot_message':
         print('Bot message Exists.')
         UserDic[msg['bot_id']] = msg['user_name']
         msgList.append(Msg(msg['bot_id'], msg['ts'],
                            msg['text'], msg['subtype']))
-    elif msg['subtype'] == 'me_message':
+    elif subtype == 'me_message':
         msgList.append(Msg(msg['user'], msg['ts'],
                            msg['text'], msg['subtype']))
-    elif msg['subtype'] == 'message_changed':
+    elif subtype == 'message_changed':
         msgList.append(Msg(msg['user'], msg['ts'], msg['text'],
                        msg['subtype'], edit_user=msg['edited']['user'],
                        edit_ts=msg['edited']['ts']))
-    elif msg['subtype'] == 'message_deleted':
+    elif subtype == 'message_deleted':
         msgList.append(Msg(msg['user'], msg['ts'],
                        'Message deleted at {}'.format(
                        time.strftime("%Y/%m/%d %a %H:%M:%S",
                                      time.localtime(float(msg['deleted_ts'])))
                                      )))
-    elif msg['subtype'] == 'channel_join':
+    elif subtype == 'channel_join':
         msgList.append(Msg(msg['user'], msg['ts'],
                            '{} has joined the channel'.format(
                             dic[msg['user']]
+                            ), msg['subtype']))
+    elif subtype == 'channel_leave':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} has left the channel'.format(
+                            dic[msg['user']]
+                            ), msg['subtype']))
+    elif subtype == 'channel_topic':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} set the channel purpose to: {}'.format(
+                            dic[msg['user']], msg['topic']
+                            ), msg['subtype']))
+    elif subtype == 'channel_purpose':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} set the channel topic: {}'.format(
+                            dic[msg['user']], msg['purpose']
+                            ), msg['subtype']))
+    elif subtype == 'channel_name':
+        pass
+    elif subtype == 'channel_archive':
+        # untested
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} has archived the channel'.format(
+                            dic[msg['user']]
+                            ), msg['subtype']))
+    elif subtype == 'channel_unarchive':
+        # untested
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} has unarchived the channel'.format(
+                            dic[msg['user']]
+                            ), msg['subtype']))
+    elif subtype == 'group_join':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} has joined the group'.format(
+                            dic[msg['user']]
+                            ), msg['subtype']))
+    elif subtype == 'group_leave':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} has left the group'.format(
+                            dic[msg['user']]
+                            ), msg['subtype']))
+    elif subtype == 'group_topic':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} set the group topic to: {}'.format(
+                            dic[msg['user']], msg['topic']
+                            ), msg['subtype']))
+    elif subtype == 'group_purpose':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} set the group purpose to: {}'.format(
+                            dic[msg['user']], msg['purpose']
+                            ), msg['subtype']))
+    elif subtype == 'group_name':
+        pass
+    elif subtype == 'group_archive':
+        pass
+    elif subtype == 'group_unarchive':
+        pass
+    elif subtype == 'file_share':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} shared a file: {}'.format(
+                            dic[msg['user']], msg['file']['url']
+                            ), msg['subtype']))
+    elif subtype == 'file_comment':
+        pass
+    elif subtype == 'file_mention':
+        pass
+    elif subtype == 'pinned_item':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} pinned their post: {}'.format(
+                            dic[msg['user']], msg['item']['url']
+                            ), msg['subtype']))
+    elif subtype == 'unpinned_item':
+        msgList.append(Msg(msg['user'], msg['ts'],
+                           '{} unpinned their post: {}'.format(
+                            dic[msg['user']], msg['item']['url']
                             ), msg['subtype']))
     else:
         pass
