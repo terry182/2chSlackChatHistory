@@ -14,11 +14,12 @@ class Msg:
 
     def getTextAs2CH(self, dic):
         self.text = re.sub('<@([A-Z0-9]+)>',
-                           lambda x: '{}'.format(dic[x.group(1)]), self.text)
+                           lambda x: '@{}'.format(dic[x.group(1)]), self.text)
         return self.text.replace('\n', '\n\t')
 
     def writeToFile(self, out, dic, cnt):
-        out.write(str(cnt) + ' 名前: {0} : {1} ID:{2}\n'.format(
+        if self.subtype != 'bot_message':
+            out.write(str(cnt) + ' 名前: {0} : {1} ID:{2}\n'.format(
                   dic[self.user],
                   time.strftime("%Y/%m/%d %a %H:%M:%S",
                                 time.localtime(float(self.ts))), self.user))
